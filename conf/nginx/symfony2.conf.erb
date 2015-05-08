@@ -9,12 +9,9 @@ location / {
     try_files $uri @rewriteapp;
 }
 
-location /api/ {
-    rewrite ^/api/(.*)$ /app_api.php/$1 break;
-}
-
 location @rewriteapp {
     # rewrite all to app.php
+    rewrite ^/api/(.*)$ /app_api.php/$1 break;
     rewrite ^(.*)$ /app.php/$1 last;
 }
 
