@@ -26,7 +26,7 @@ case "$1" in
         fi
         ;;
     get-log-files)
-        echo "app/logs/prod.log" "app/logs/dev.log"
+        echo "app/logs/prod.log" "app/logs/dev.log" "app_api/logs/prod.log" "app_api/logs/dev.log"
         ;;
     compile)
         echo "-----> Setting up Symfony2 app"
@@ -45,6 +45,17 @@ case "$1" in
         status "Inplace replacment of $CACHE_DIR to $APP_DIR"
         find $CACHE_DIR/app/cache/prod -type f -exec sed -i "s@$CACHE_DIR@$APP_DIR@g" {} \; | indent
         grep $CACHE_DIR/app/cache/prod -r . && error "Could find some '$CACHE_DIR' :/ "
+
+
+
+        status "Warmuping cache"
+        rm -rf app_api/cache/*
+        php app_api/console cache:warmup --env=prod --no-debug | indent
+
+
+        status "Inplace replacment of $CACHE_DIR to $APP_DIR"
+        find $CACHE_DIR/app_api/cache/prod -type f -exec sed -i "s@$CACHE_DIR@$APP_DIR@g" {} \; | indent
+        grep $CACHE_DIR/app_api/cache/prod -r . && error "Could find some '$CACHE_DIR' :/ "
 
         status "End"
         ;;

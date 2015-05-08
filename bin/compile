@@ -125,6 +125,16 @@ function package_newrelic_enabled() {
     fi
 }
 
+function package_wkhtmltopdf_enabled() {
+    local val=$(jq --raw-output ".extra.${composer_extra_key}[\"wkhtmltopdf\"] // false" < "$BUILD_DIR/composer.json")
+
+    if [ "$val" = "true" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 export_env_dir "$3"
 
 # Download jq binary for JSON processing
@@ -299,6 +309,17 @@ mv /app/vendor/libmcrypt vendor/libmcrypt
 mv /app/vendor/nginx vendor/nginx
 mv /app/vendor/php vendor/php
 [ -d "/app/vendor/libmemcached" ] && mv /app/vendor/libmemcached vendor/libmemcached
+
+if package_wkhtmltopdf_enabled; then
+    status "Vendoring wkhtmltopdf into slug"
+    WKHTMLTOPDF_URL='http://garr.dl.sourceforge.net/project/wkhtmltopdf/archive/0.12.0/wkhtmltox-linux-amd64_0.12.0-03c001d.tar.xz'
+    WKHTMLTOPDF_TARBALL='wkhtmltox-linux-amd64_0.12.0-03c001d.tar.xz'
+    curl $WKHTMLTOPDF_URL -sLo $WKHTMLTOPDF_TARBALL
+    tar xf $WKHTMLTOPDF_TARBALL
+    mv wkhtmltox/bin/wkhtmltopdf vendor/wkhtmltopdf
+    rm -rf wkhtmltox
+    rm -rf $WKHTMLTOPDF_TARBALL
+fi
 
 mkdir -p "bin" "vendor/bin"
 cp ${basedir}/heroku* "bin"
