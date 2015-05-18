@@ -4,6 +4,10 @@ root /app/<%= ENV['DOCUMENT_ROOT'] %>;
 root /app/web;
 <% end %>
 
+location /api/v1 {
+    rewrite ^/api/v1/(.*)$ /app_api.php/api/v1/$1 last;
+}
+
 location / {
     # try to serve file directly, fallback to rewrite
     try_files $uri @rewriteapp;
@@ -11,7 +15,6 @@ location / {
 
 location @rewriteapp {
     # rewrite all to app.php
-    rewrite ^/api/(.*)$ /app_api.php/$1 break;
     rewrite ^(.*)$ /app.php/$1 last;
 }
 
